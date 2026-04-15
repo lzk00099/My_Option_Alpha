@@ -37,29 +37,31 @@ def render_logic_matrix(pcr, iv, symbol, mode="compact"):
     is_iv_low = iv < 0.4         # IV 极低 (针对2026高波动市场微调)
     is_iv_high = iv > 0.8        # IV 飙升
     
-    # 1. 极度拥挤 + IV 极低
+# --- 核心函数：五种逻辑组合判定器 ---
+def render_logic_matrix(pcr, iv, symbol, mode="compact"):
+    is_pcr_low = pcr < 0.3
+    is_pcr_high = pcr > 1.0
+    is_iv_low = iv < 0.4
+    is_iv_high = iv > 0.8
+    
     if is_pcr_low and is_iv_low:
-        status, advice, color, level = "🔴 极度拥挤 (多头陷阱)", "“傻瓜式”盲目看涨，买盘即将枯竭。策略：减仓、买入廉价 Put 对冲。", "error", "🔴 极高"
-    # 2. 保护情绪升温 + IV 极低
+        res = ("🔴 极度拥挤 (多头陷阱)", "“傻瓜式”盲目看涨，买盘即将枯竭。策略：减仓、买入廉价 Put 对冲。", "error", "🔴 极高")
     elif is_pcr_high and is_iv_low:
-        status, advice, color, level = "🟠 保护情绪升温 (隐形撤退)", "聪明钱正在低成本悄悄“买保险”离场。策略：清空卖出的 Put，停止加仓。", "warning", "🟠 高"
-    # 3. 保护情绪升温 + IV 飙升
+        res = ("🟠 保护情绪升温 (隐形撤退)", "聪明钱正在低成本悄悄“买保险”离场。策略：清空卖出的 Put，停止加仓。", "warning", "🟠 高")
     elif is_pcr_high and is_iv_high:
-        status, advice, color, level = "🟡 情绪崩溃 (踩踏中)", "恐慌已经发生，踩踏正在进行中。策略：分批接回（博反弹）或躺平。", "info", "🟡 中"
-    # 4. 极度拥挤 + IV 飙升
+        res = ("🟡 情绪崩溃 (踩踏中)", "恐慌已经发生，踩踏正在进行中。策略：分批接回（博反弹）或躺平。", "info", "🟡 中")
     elif is_pcr_low and is_iv_high:
-        status, advice, color, level = "🔴 贪婪末尾 (最后博弈)", "多头正在用最贵的成本博弈。策略：无条件止盈清仓。", "error", "🔴 极高"
-    # 5. 情绪平稳 + IV 极低
+        res = ("🔴 贪婪末尾 (最后博弈)", "多头正在用最贵的成本博弈。策略：无条件止盈清仓。", "error", "🔴 极高")
     elif not is_pcr_low and not is_pcr_high and is_iv_low:
-        status, advice, color, level = "🟢 情绪平稳 (价值窗口)", "暴风雨前的宁静，市场尚未定价风险。策略：买入 Call 建立底仓。", "success", "🟢 机会"
+        res = ("🟢 情绪平稳 (价值窗口)", "暴风雨前的宁静，市场尚未定价风险。策略：买入 Call 建立底仓。", "success", "🟢 机会")
     else:
-        status, advice, color, level = "⚪ 中性状态", "市场暂无极端信号，维持原有计划。", "info", "⚪ 低"
+        res = ("⚪ 中性状态", "市场暂无极端信号，维持原有计划。", "info", "⚪ 低")
 
     if mode == "compact":
-        st.caption(f"**{status}**")
+        st.caption(f"**{res[0]}**")
     else:
-        st.markdown(f"**风险等级：{level}**")
-        getattr(st, color)(f"**诊断：{status}** \n\n {advice}")
+        st.markdown(f"**风险等级：{res[3]}**")
+        getattr(st, res[2])(f"**诊断：{res[0]}** \n\n {res[1]}")
 
 # --- 引擎 1：自动导航 ---
 @st.fragment(run_every=60)
