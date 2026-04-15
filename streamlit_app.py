@@ -49,6 +49,16 @@ def run_portfolio_engine():
             
             if iv < 0.3:
                 st.info("💎 IV 极低")
+st.markdown("---")
+    st.subheader("💡 快速决策矩阵 (持仓专用)")
+    # 这里直接显示上面的表格 (st.table 或 st.markdown)
+    st.markdown("""
+    | 信号 | 解读 | 对策 |
+    | :--- | :--- | :--- |
+    | PCR < 0.25 | 多头太挤 | 撤退/止盈 |
+    | IV < 0.3 | 期权太便宜 | 买入对冲/建仓 |
+    | PCR > 1.0 | 机构在逃 | 平仓卖权(Sold Put) |
+    """)
 
 # --- 引擎 2：战术分析 (手动诊断) ---
 @st.fragment()
@@ -83,8 +93,48 @@ def run_tactical_engine():
                 st.success(f"✅ {sym} 机会：期权价格极度低估，若模型看涨，此刻买入 Call 性价比极高。")
             else:
                 st.info(f"ℹ️ {sym} 提示：情绪中性，建议关注财报 Delta 暴露。")
-
+                
+if st.button("开始深度诊断"):
+        for sym in [t1, t2]:
+            p, pr, v, e, tk = get_metrics(sym)
+            # ... 绘制图表 ...
+            
+            # 插入互动诊断器
+            render_logic_matrix(pr, v, sym)
+            
 # --- 执行引擎 ---
 run_portfolio_engine()
 st.markdown("---")
 run_tactical_engine()
+
+def render_logic_matrix(pcr, iv, symbol):
+    st.markdown(f"#### 🧠 {symbol} 决策诊断矩阵")
+    
+    # 逻辑判断
+    is_crowded = pcr < 0.3
+    is_fearful = pcr > 1.0
+    is_iv_cheap = iv < 0.35 # 这里的 35% 可以根据不同个股调整
+    
+    # 状态组合分析
+    if is_crowded and is_iv_cheap:
+        status = "【多头自大陷阱】"
+        advice = "市场极度看涨且没买保险。建议：卖出 50% Call 仓位，或者买入虚值 Put 防守。"
+        color = "error"
+    elif is_fearful and is_iv_cheap:
+        status = "【隐形撤退信号】"
+        advice = "机构正在低成本买入对冲。建议：平仓所有的 Sold Puts，不要在此处抄底。"
+        color = "warning"
+    elif not is_crowded and is_iv_cheap:
+        status = "【价值建仓窗口】"
+        advice = "期权费便宜且情绪不拥挤。建议：若随机森林模型看涨，可买入 Call。"
+        color = "success"
+    else:
+        status = "【震荡市/中性】"
+        advice = "建议观察 IV Skew 曲线，若左侧过陡，谨慎持仓。"
+        color = "info"
+        
+    # 渲染 UI
+    getattr(st, color)(f"**诊断状态：{status}** \n{advice}")
+
+# 在引擎 2 的循环中调用：
+# render_logic_matrix(pcr, iv, sym)
