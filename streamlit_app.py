@@ -151,8 +151,8 @@ def run_manual_override_engine():
             render_logic_matrix(m_pcr, m_iv, "MANUAL", mode="detailed")
 
 # --- 启动所有引擎 ---
-# run_portfolio_engine()
-# st.markdown("---")
-# run_tactical_engine()
+run_portfolio_engine()
+st.markdown("---")
+run_tactical_engine()
 st.markdown("---")
 run_manual_override_engine()
