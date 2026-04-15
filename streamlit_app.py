@@ -16,23 +16,20 @@ def get_metrics(symbol):
         price = hist['Close'].iloc[-1]
         
         # 获取期权链
-        expirations = tk.options
-        if not expirations: return price, 0, 0, "N/A", tk
-        
-        exp = expirations[0]
-        opt = tk.option_chain(exp)
-        
-        # 计算 P/C Ratio (Open Interest)
-        calls_oi = opt.calls['openInterest'].sum()
-        puts_oi = opt.puts['openInterest'].sum()
-        pcr = puts_oi / (calls_oi + 1e-5)
-        
-        # 计算平均 IV
-        avg_iv = opt.calls['impliedVolatility'].mean()
-        
-        return price, pcr, avg_iv, exp, tk
-    except Exception as e:
-        return 0, 0, 0, "N/A", None
+    expirations = tk.options
+    if not expirations: return price, 0, 0, "N/A", tk
+    
+    # 强制只抓取最近一个到期日（通常是本周五或下周五），这最能反映实时情绪
+    recent_exp = expirations[0] 
+    opt = tk.option_chain(recent_exp)
+    
+    # 计算近月 P/C Ratio
+    calls_oi = opt.calls['openInterest'].sum()
+    puts_oi = opt.puts['openInterest'].sum()
+    pcr = puts_oi / (calls_oi + 1e-5)
+    
+    # 如果 PCR 突变，即使 IV 低，也要强行报警
+    return price, pcr, avg_iv, recent_exp, tk
 
 # --- 决策诊断逻辑组件 ---
 def render_logic_matrix(pcr, iv, symbol, mode="compact"):
