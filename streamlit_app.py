@@ -113,7 +113,46 @@ def run_tactical_engine():
             
         render_logic_matrix(pr, v, t1, mode="detailed")
 
-# 启动
-run_portfolio_engine()
+# --- 引擎 3：手动校准诊断器 (New!) ---
+@st.fragment()
+def run_manual_override_engine():
+    st.markdown("### 🛠️ 引擎 3：券商实时数据校准中心")
+    st.info("当引擎抓取数据延迟时，请手动输入 Thinkorswim (TOS) 看到的数据进行终极诊断。")
+    
+    with st.container():
+        c1, c2, c3, c4 = st.columns(4)
+        m_iv = c1.number_input("实时 IV (Imp Volatility)", value=0.50, step=0.01)
+        m_hv = c2.number_input("实时 HV (Historical Vol)", value=0.40, step=0.01)
+        m_ivp = c3.slider("IV Percentile (IVP %)", 0, 100, 50)
+        m_pcr = c4.number_input("实时 PCR (P/C Ratio)", value=0.60, step=0.1)
+        
+    if st.button("生成实战结论"):
+        st.markdown("---")
+        col_res1, col_res2 = st.columns([1, 2])
+        
+        with col_res1:
+            st.write("#### 📊 定价评估")
+            # 定价逻辑：IV 与 HV 的偏离度
+            if m_iv > m_hv * 1.5:
+                st.warning("⚠️ 期权定价过贵：市场预期远超历史波动，可能有重大事件待发生。建议：避免单边买 Call，考虑卖权策略。")
+            elif m_iv < m_hv * 0.8:
+                st.success("💎 期权定价超值：期权费低于历史表现，是极佳的买入窗口。")
+            else:
+                st.info("⚖️ 定价中性：波动率定价符合历史规律。")
+            
+            # IVP 评估
+            if m_ivp > 80:
+                st.error(f"🚨 IVP ({m_ivp}%) 极高：当前期权费处于全年高位，买入风险极大。")
+            elif m_ivp < 20:
+                st.success(f"🔥 IVP ({m_ivp}%) 极低：当前是全年最便宜的时刻，建仓机会。")
+
+        with col_res2:
+            st.write("#### 🧠 综合决策建议")
+            render_logic_matrix(m_pcr, m_iv, "MANUAL", mode="detailed")
+
+# --- 启动所有引擎 ---
+# run_portfolio_engine()
+# st.markdown("---")
+# run_tactical_engine()
 st.markdown("---")
-run_tactical_engine()
+run_manual_override_engine()
