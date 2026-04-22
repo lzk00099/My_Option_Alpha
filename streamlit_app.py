@@ -86,7 +86,7 @@ def run_tactical_engine():
     t1 = c1.text_input("标的代号", "ONDS", key="tactical_ticker").upper()
     override_pcr = c2.slider(f"手动校准 {t1} 的 PCR", 0.05, 2.0, 0.8)
     
-    if st.button("开始深度诊断"):
+    if st.button("开始深度诊断", key="tactical_btn"):
         p, pr, v, e, tk = get_metrics(t1)
         pr = override_pcr 
         
@@ -105,18 +105,14 @@ def run_tactical_engine():
             
         render_logic_matrix(pr, v, t1, mode="detailed")
 
-# ... 前面的导入和函数定义保持不变 ...
-
 # --- 5. 引擎 3：手动校准中心 ---
 @st.fragment()
 def run_manual_override_engine():
-    # 增加一个明显的标题容器
     st.markdown("### 🛠️ 引擎 3：券商实时数据校准中心")
     st.info("💡 当引擎抓取数据延迟时，请手动输入 Thinkorswim (TOS) 看到的数据进行终极诊断。")
     
     with st.container(border=True):
         c1, c2, c3, c4 = st.columns(4)
-        # 为 key 增加唯一标识，防止 Fragment 重复渲染冲突
         m_iv = c1.number_input("实时 IV (Imp Volatility)", value=0.50, step=0.01, key="m_iv_input")
         m_hv = c2.number_input("实时 HV (Historical Vol)", value=0.40, step=0.01, key="m_hv_input")
         m_ivp = c3.slider("IV Percentile (IVP %)", 0, 100, 50, key="m_ivp_slider")
@@ -144,36 +140,31 @@ def run_manual_override_engine():
                 st.write("#### 🧠 综合决策建议")
                 render_logic_matrix(m_pcr, m_iv, "MANUAL", mode="detailed")
 
-# --- 页面主循环 ---
-# 将 Title 放在所有函数调用之前
+# --- 核心布局：并列切换界面 ---
 st.title("🚀 Alpha Option Engine v2026.4")
-st.caption("系统状态：实时监控中 | 交易日：2026-04-22")
-st.divider()
+st.caption(f"系统时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | 策略库版本：Optimus-Prime")
 
-# 依次执行，确保即使一个失败，其他也能尝试加载
-try:
-    run_portfolio_engine()
-except Exception as e:
-    st.error(f"引擎 1 加载失败: {e}")
+# 创建三个并列的标签页
+tab1, tab2, tab3 = st.tabs([
+    "🛰️ 核心持仓巡航", 
+    "🎯 战术深度诊断", 
+    "🛠️ 手动校准中心"
+])
 
-st.divider()
+with tab1:
+    try:
+        run_portfolio_engine()
+    except Exception as e:
+        st.error(f"引擎 1 运行异常: {e}")
 
-try:
-    run_tactical_engine()
-except Exception as e:
-    st.error(f"引擎 2 加载失败: {e}")
+with tab2:
+    try:
+        run_tactical_engine()
+    except Exception as e:
+        st.error(f"引擎 2 运行异常: {e}")
 
-st.divider()
-
-
-# --- 页面底部 & 引擎启动 ---
-st.title("🚀 Alpha Option Engine v2026.4")
-st.divider()
-
-run_portfolio_engine()
-st.divider()
-
-run_tactical_engine()
-st.divider()
-
-run_manual_override_engine()
+with tab3:
+    try:
+        run_manual_override_engine()
+    except Exception as e:
+        st.error(f"引擎 3 运行异常: {e}")
