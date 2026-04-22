@@ -105,20 +105,24 @@ def run_tactical_engine():
             
         render_logic_matrix(pr, v, t1, mode="detailed")
 
+# ... 前面的导入和函数定义保持不变 ...
+
 # --- 5. 引擎 3：手动校准中心 ---
 @st.fragment()
 def run_manual_override_engine():
+    # 增加一个明显的标题容器
     st.markdown("### 🛠️ 引擎 3：券商实时数据校准中心")
     st.info("💡 当引擎抓取数据延迟时，请手动输入 Thinkorswim (TOS) 看到的数据进行终极诊断。")
     
     with st.container(border=True):
         c1, c2, c3, c4 = st.columns(4)
-        m_iv = c1.number_input("实时 IV (Imp Volatility)", value=0.50, step=0.01)
-        m_hv = c2.number_input("实时 HV (Historical Vol)", value=0.40, step=0.01)
-        m_ivp = c3.slider("IV Percentile (IVP %)", 0, 100, 50)
-        m_pcr = c4.number_input("实时 PCR (P/C Ratio)", value=0.60, step=0.1)
+        # 为 key 增加唯一标识，防止 Fragment 重复渲染冲突
+        m_iv = c1.number_input("实时 IV (Imp Volatility)", value=0.50, step=0.01, key="m_iv_input")
+        m_hv = c2.number_input("实时 HV (Historical Vol)", value=0.40, step=0.01, key="m_hv_input")
+        m_ivp = c3.slider("IV Percentile (IVP %)", 0, 100, 50, key="m_ivp_slider")
+        m_pcr = c4.number_input("实时 PCR (P/C Ratio)", value=0.60, step=0.1, key="m_pcr_input")
         
-        if st.button("生成实战结论", type="primary"):
+        if st.button("生成实战结论", type="primary", key="manual_btn"):
             st.markdown("---")
             col_res1, col_res2 = st.columns([1, 2])
             
@@ -139,6 +143,28 @@ def run_manual_override_engine():
             with col_res2:
                 st.write("#### 🧠 综合决策建议")
                 render_logic_matrix(m_pcr, m_iv, "MANUAL", mode="detailed")
+
+# --- 页面主循环 ---
+# 将 Title 放在所有函数调用之前
+st.title("🚀 Alpha Option Engine v2026.4")
+st.caption("系统状态：实时监控中 | 交易日：2026-04-22")
+st.divider()
+
+# 依次执行，确保即使一个失败，其他也能尝试加载
+try:
+    run_portfolio_engine()
+except Exception as e:
+    st.error(f"引擎 1 加载失败: {e}")
+
+st.divider()
+
+try:
+    run_tactical_engine()
+except Exception as e:
+    st.error(f"引擎 2 加载失败: {e}")
+
+st.divider()
+
 
 # --- 页面底部 & 引擎启动 ---
 st.title("🚀 Alpha Option Engine v2026.4")
