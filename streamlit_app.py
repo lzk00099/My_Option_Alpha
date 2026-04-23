@@ -110,7 +110,7 @@ def run_manual_override_engine():
     st.markdown("### 🛠️ 引擎 3：券商实时数据校准中心")
     st.info("💡 当引擎抓取数据延迟时，请手动输入 Thinkorswim (TOS) 看到的数据进行终极诊断。")
     
-    with st.container:
+    with st.container():
         c1, c2, c3, c4 = st.columns(4)
         m_iv = c1.number_input("实时 IV (Imp Volatility)", value=0.50, step=0.01, key="m_iv_input")
         m_hv = c2.number_input("实时 HV (Historical Vol)", value=0.40, step=0.01, key="m_hv_input")
