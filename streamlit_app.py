@@ -106,7 +106,7 @@ def run_tactical_engine():
         render_logic_matrix(pr, v, t1, mode="detailed")
 
 # --- 5. 引擎 3：手动校准中心 ---
-@st.fragment
+@st.fragment()
 def run_manual_override_engine():
     st.markdown("### 🛠️ 引擎 3：券商实时数据校准中心")
     st.info("💡 当引擎抓取数据延迟时，请手动输入 Thinkorswim (TOS) 看到的数据进行终极诊断。")
