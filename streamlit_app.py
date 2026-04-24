@@ -82,10 +82,14 @@ def run_manual_override_engine():
     st.info("💡 当雅虎数据延迟时，请手动输入 Thinkorswim (TOS) 看到的数据进行终极诊断。")
     with st.container(border=True):
         c1, c2, c3, c4 = st.columns(4)
-        m_iv = c1.number_input("实时 IV (Imp Vol)", value=0.50, step=0.01, key="m_iv_input")
-        m_hv = c2.number_input("实时 HV (Hist Vol)", value=0.40, step=0.01, key="m_hv_input")
-        m_ivp = c3.slider("IV Percentile (IVP %)", 0, 100, 50, key="m_ivp_slider")
-        m_pcr = c4.number_input("实时 PCR (P/C Ratio)", value=0.60, step=0.1, key="m_pcr_input")
+        
+        # 使用更独特的 key 名，避免和 tab1/tab2 可能存在的变量名冲突
+        m_iv = c1.number_input("实时 IV (Imp Vol)", value=0.50, step=0.01, key="tos_iv_val")
+        m_hv = c2.number_input("实时 HV (Hist Vol)", value=0.40, step=0.01, key="tos_hv_val")
+        m_ivp = c3.slider("IV Percentile (IVP %)", 0, 100, 50, key="tos_ivp_slider")
+        m_pcr = c4.number_input("实时 PCR (P/C Ratio)", value=0.60, step=0.1, key="tos_pcr_val")
+        
+
         
         if st.button("生成实战结论", type="primary", key="manual_btn"):
             st.markdown("---")
