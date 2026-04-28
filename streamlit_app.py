@@ -142,12 +142,10 @@ with tab2:
 
 with tab3:
     st.header("🛠️ 券商实时数据校准中心")
-    run_manual_override_engine()
-
-st.sidebar.info("💡 **观察建议**：推荐在美股开盘 1 小时后观察。")
-
-with tab3:
     try:
+        # 只保留这一次调用
         run_manual_override_engine()
     except Exception as e:
         st.error(f"引擎 3 运行异常: {e}")
+
+st.sidebar.info("💡 **观察建议**：推荐在美股开盘 1 小时后观察。")
