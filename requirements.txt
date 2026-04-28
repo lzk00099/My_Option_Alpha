@@ -2,4 +2,5 @@ pandas
 yfinance
 numpy
 streamlit
-matplotlib  <-- 必须添加这一行
+matplotlib
+scikit-learn
