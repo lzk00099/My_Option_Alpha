@@ -1,5 +1,5 @@
-streamlit
-yfinance
 pandas
-plotly
+yfinance
 numpy
+streamlit
+matplotlib  <-- 必须添加这一行
